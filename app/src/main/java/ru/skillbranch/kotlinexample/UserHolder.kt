@@ -1,6 +1,8 @@
 package ru.skillbranch.kotlinexample
 
 import androidx.annotation.VisibleForTesting
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 object UserHolder {
 
@@ -14,8 +16,7 @@ object UserHolder {
         map[login] = user
         return user
     }
-
-    private fun isUserExist(login:String) = map[login] != null
+    private fun isUserExist(login: String) = map[login] != null
 
     fun loginUser(login:String, password: String):String? =
         map[login.trim()]?.let { user ->

@@ -19,13 +19,13 @@ class User private constructor(
             .joinToString (" ")
             .capitalize()
 
-    private val initialis : String
+    private val initials : String
         get() = listOfNotNull(firstName, lastName)
             .map{it.first().toUpperCase()}
             .joinToString(" ")
 
     private var phone : String? = null
-        set(value) { field = value?.replace("""[^+\d]""".toRegex(), "")}
+        set(value) { field = value?.replace("[^+\\d]".toRegex(), "")}
 
     private var _login:String?=null
     var login:String
@@ -34,10 +34,10 @@ class User private constructor(
         }
         get() = _login!!
 
-    private var salt : String? = null
-
     private lateinit var passwordHash : String
-
+    private val salt : String by lazy {
+        ByteArray(16).also { SecureRandom().nextBytes(it) }.toString()
+    }
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     var accessCode: String?=null
 
@@ -76,14 +76,14 @@ class User private constructor(
         login = email ?: phone!!
 
         userInfo = """
-            firstName : $firstName
-            lastName : $lastName
-            login    : $login
-            fullName : $fullName
-            initialis: $initialis
-            email    : $email
-            phone    : $phone
-            meta    : $meta
+            firstName: $firstName
+            lastName: $lastName
+            login: $login
+            fullName: $fullName
+            initials: $initials
+            email: $email
+            phone: $phone
+            meta: $meta
         """.trimIndent()
     }
 
@@ -99,13 +99,7 @@ class User private constructor(
         }else throw IllegalArgumentException("The entered password does not match the current password")
     }
 
-    private fun encrypt(password: String):String{
-        if(salt.isNullOrEmpty()){
-            salt = ByteArray(16).also {SecureRandom().nextBytes(it) }.toString()
-        }
-        println("Salt while encrypt: $salt")
-        return salt.plus(password).md5()
-    }
+    private fun encrypt(password: String): String = salt.plus(password).md5()
 
     private fun String.md5():String{
         val md = MessageDigest.getInstance("MD5")
@@ -114,7 +108,7 @@ class User private constructor(
         return hexStr.padStart(32, '0')
     }
 
-    fun generateAccessCode():String{
+    private fun generateAccessCode():String{
         val possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
         return StringBuilder().apply {
@@ -126,7 +120,7 @@ class User private constructor(
         }.toString()
     }
 
-    fun sendAccessCodeToUser(phone: String, code:String){
+    private fun sendAccessCodeToUser(phone: String, code:String){
         println("... sending access code: $code on $phone")
     }
 
