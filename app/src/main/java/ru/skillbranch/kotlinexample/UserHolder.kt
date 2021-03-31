@@ -25,7 +25,7 @@ object UserHolder {
         val user = User.makeUser(fullName, phone = rawPhone)
         val login = user.login
 
-        if (map[login] != null)
+        if (isUserExist(login))
             throw IllegalArgumentException("A user with this phone already exists")
         map[login] = user
         return user
