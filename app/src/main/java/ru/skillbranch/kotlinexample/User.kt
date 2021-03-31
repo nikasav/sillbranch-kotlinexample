@@ -131,7 +131,7 @@ class User private constructor(
             password    : String?=null,
             phone       : String?=null
         ):User {
-            val (firstName, lastName) = fullName.fullNameToPair()
+            val (firstName, lastName) = fullName.fullNameToPairMy()
             return when{
                 !phone.isNullOrBlank() -> User(firstName, lastName, phone)
                 !email.isNullOrBlank() && !password.isNullOrBlank() -> User(firstName, lastName, email, password)
@@ -144,12 +144,27 @@ class User private constructor(
                 .filter { it.isNullOrBlank() }
                 .run {
                     when(size) {
-                        1->first() to null
-                        2->first() to last()
+                        1->{
+                            println("${first()} --  null")
+                            first() to null
+                        }
+                        2->{
+                            println("${first()} --  ${last()}")
+                            first() to last()
+                        }
                         else -> throw IllegalArgumentException("FullName must contain only first name and last name, current split result : ${this@fullNameToPair}")
                     }
                 }
 
+        private fun String.fullNameToPairMy() : Pair<String, String?> {
+            val fullName = this
+            val res  = fullName.split(" ")
+            return when(res.size){
+                1 -> res.first() to null
+                2 -> res.first() to res.last()
+                else -> throw IllegalArgumentException("FullName must contain only first name and last name, current split result : $fullName")
+            }
+        }
     }
 }
 
