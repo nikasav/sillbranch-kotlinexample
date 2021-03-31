@@ -1,8 +1,6 @@
 package ru.skillbranch.kotlinexample
 
 import androidx.annotation.VisibleForTesting
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 object UserHolder {
 
@@ -43,34 +41,35 @@ object UserHolder {
         return true
     }
 
-    // Авторизация пользователя
-    fun loginUser(login: String, password: String):String? {
-        return map[login.trim()]?.run {
-            if (checkPassword(password)) this.userInfo
-            else null
+    fun getValidPhone(phone: String):String?{
+        var numberPhone = "+"
+        for (ch in phone.indices){
+            if (phone[ch].isDigit())
+                numberPhone += phone[ch]
         }
+        if(numberPhone.length != 12)
+            return null
+        return numberPhone
     }
 
+
     // Авторизация пользователя
-    fun loginUser1(login: String, password: String):String? {
-        println("login = $login password = $password")
-        map[login.trim()]?.let { user ->
-            if (isUserExist(login))
-                println("user!!!!!!!! $map[$login]")
-            if(user.checkPassword(password)) {
-                println("${user.userInfo}")
-                return user.userInfo
-            }else{
-                return null
-            }
+    fun loginUser(login: String, password: String):String? {
+        val phoneOrEmail = if (isValidPhone(login)) getValidPhone(login) else login
+        map[phoneOrEmail]?.let { user ->
+            return if(user.checkPassword(password))
+                user.userInfo
+            else
+                null
         }
         return null
     }
 
     // Запрос кода авторизации
-    fun  requestAccessCode(login: String) : Unit {
+    fun requestAccessCode(login: String) {
+        val phone = (if (isValidPhone(login)) getValidPhone(login) else return) ?: return
+        map[phone]?.regenerateAccessCode(login)
     }
-
 
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)

@@ -59,11 +59,7 @@ class User private constructor(
         rawPhone: String
     ):this(firstName, lastName, rawPhone = rawPhone, meta = mapOf("auth" to "sms")){
         println("Secondary phone constructor")
-        val code = generateAccessCode()
-        passwordHash = encrypt(code)
-        println("Phone passwordHash is $passwordHash")
-        accessCode = code
-        sendAccessCodeToUser(rawPhone, code)
+        regenerateAccessCode(rawPhone)
     }
 
     init{
@@ -108,6 +104,14 @@ class User private constructor(
         return hexStr.padStart(32, '0')
     }
 
+    fun regenerateAccessCode(rawPhone: String) {
+        val code = generateAccessCode()
+        passwordHash = encrypt(code)
+        println("Phone passwordHash is $passwordHash")
+        accessCode = code
+        sendAccessCodeToUser(rawPhone, code)
+    }
+
     private fun generateAccessCode():String{
         val possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -144,14 +148,8 @@ class User private constructor(
                 .filter { it.isNullOrBlank() }
                 .run {
                     when(size) {
-                        1->{
-                            println("${first()} --  null")
-                            first() to null
-                        }
-                        2->{
-                            println("${first()} --  ${last()}")
-                            first() to last()
-                        }
+                        1-> first() to null
+                        2-> first() to last()
                         else -> throw IllegalArgumentException("FullName must contain only first name and last name, current split result : ${this@fullNameToPair}")
                     }
                 }
